@@ -287,3 +287,111 @@ const [addTodo, {data, loading, error}] = useMutation(ADD_TODO);
 const handleOnSubmit = () => {
     addTodo({variables: {type: "New"}})
 }
+
+17. How does useCallback works?
+useCallback memoizes the function (not the return of the function!), so that it doesn't reinitialize and recalculate on every component render.
+Whenever the dependencies change it will recalculate and again store the value (the function) in a cache.
+
+const onCheckoutHandler = useCallback(() => {
+    navigate("/checkout");
+}, []) // this will throw a warning saying to include navigate but navigate actually will not change but react doesn't know it
+
+Option 1.
+Include navigate in the dependencies array as long as you understand that this is not something that is going to change and make the function recalculate.
+
+Option 2.
+Do not include it and comment out using eslint comment, so that it is very clear that this function will be rendered only once on mount.
+
+If you forget to include a dependency and you are depending on it in the callback, it will always be the same initial value, 
+because the function was store with this initial value and although the component rerendered, the function was never reinitialized,
+it was simply taken from the cache.
+
+18. What is useMemo hook?
+It works similarly to useCallback hook but stored in cache the return value of a function. 
+
+19. What is memo from React and when do we need to wrap a component with it?
+memo lets you skip re-rendering a component when its props are unchanged.
+Wrap a component in memo to get a memoized version of that component.
+
+React normally re-renders a component whenever its parent re-renders.
+
+With memo, 
+you can create a component that React will not re-render when its parent re-renders 
+so long as its new props are the same as the old props.
+
+Even with memo, your component will re-render if its own state changes or if a context that it’s using changes.
+It won't rerender only if the parent rerendered. So for example it is useful for lists (products.map) to wrap the child component in memo.
+As we are adding to the list (the previously added elements aren't rerendered as we add more products).
+
+You can wrap it like so:
+
+import { memo } from "react";
+import { CartItemContainer, ItemDetails } from "./cart-item.styles";
+
+const CartItem = memo(({ cartItem }) => {
+  const { name, imageUrl, price, quantity } = cartItem;
+  return (
+    <CartItemContainer>
+      <img src={imageUrl} alt={`${name}`} />
+      <ItemDetails>
+        <span>{name}</span>
+        <span>
+          {quantity} x ${price}
+        </span>
+      </ItemDetails>
+    </CartItemContainer>
+  );
+});
+
+export default CartItem;
+
+Or simply at the end:
+export default memo(CartItem);
+
+
+20. What are higher-order components in React?
+A higher-order component (HOC) is an advanced technique in React for reusing component logic, as mentioned in the React Docs. 
+A HOC is not a part of the React API, but it is just a function with a component as an argument and returns a new component.
+
+21. What is React.memo?
+React.memo is a higher-order function. 
+It is used to memoize the result of our component, which helps to boost the performance of our React application.
+In simple terms, if our component returns the same result for the same prop values passed to it, 
+then rendering the same result ruins the performance of the application. 
+
+22. What is a higher order function?
+
+A function which takes another function as an argument 
+or returns a function is known as a higher order function.
+
+We know that JavaScript provides us with some 
+inbuilt higher order functions like map(), filter(), reduce().
+Map takes a function as argument!
+
+We can also return a function from a function:
+
+function calculate(operation) {
+  switch (operation) {
+    case "ADD":
+      return function (a, b) {
+        console.log(`${a} + ${b} = ${a + b}`);
+      };
+    case "SUBTRACT":
+      return function (a, b) {
+        console.log(`${a} - ${b} = ${a - b}`);
+      };
+  }
+}
+
+const calculateAdd = calculate("ADD");
+calculateAdd(2, 3);
+// Output: 2 + 3 = 5
+
+Call the returned function using double parentheses
+This is a very sophisticated way of calling the inner returned function. 
+
+calculate("ADD")(2, 3);
+// Output: 2 + 3 = 5
+
+
+
