@@ -268,3 +268,22 @@ const GET_CATEGORY = gql`
 It caches the query (if the parameters haven't changed and were called before) - it will not make another call,
 it will just take the value from the cache.
 Less request = better performance.
+
+16. How to write a mutation in GraphQL?
+
+const ADD_TODO = gql`
+
+    mutation AddTodo($type: String!) {
+        addTodo(type: $type) {
+            id
+            type
+        }
+    }
+
+`
+
+const [addTodo, {data, loading, error}] = useMutation(ADD_TODO);
+
+const handleOnSubmit = () => {
+    addTodo({variables: {type: "New"}})
+}
