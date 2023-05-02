@@ -1,0 +1,270 @@
+1. What is GraphQL?
+GraphQL is a query language for APIs. Instead of sending a request to backend to a specific endpoint 
+(backend returns a response, backend determines the shape of returned data),
+GraphQL lets the frontend make a request and defining what props it wants to have returned from database.
+2. Can we use both GraphQL and Redux?
+No, they are in conflict.
+3. What means the exclamation mark in GraphQL?
+It means that the field is mandatory, without it the field is optional.
+
+type Collection {
+    id: ID! // this is a specific ID from GraphQL - a String but also unique
+    title: String!
+    items: [Item!]!
+}
+
+type Item {
+    id: ID!
+    name: String!
+    price: Float! // for floating point numbers
+    imageUrl: String!
+    collection: Collection // it is only so that GraphQL can connect Item to a Collection
+}
+
+4. How to write a simple get query without parameters?
+
+Shaped like an object but no commas.
+query {
+  collections {
+    id
+    title
+    items {
+      id
+      name
+      price
+      imageUrl
+    }
+}
+
+5. How to write a query with parameters?
+
+First create a variable in Query variables tab: 
+{"id": "cjwuuj5bz000i0719rrtw5gqk"}
+
+query($id: ID!) { // at the top level we need to specify what variables are going to be used, exclamation mark must be there - the type must exactly match the schema
+  collection(id: $id) {
+    id,
+    title, 
+    items {
+      id
+      name
+      price
+      imageUrl
+    }
+  }
+}
+
+6. Can we call multiple requests in one query?
+Yes.
+Like so:
+query($id: ID!) {
+  collection(id: $id) {
+    id,
+    title, 
+    items {
+      id
+      name
+      price
+      imageUrl
+    }
+  }
+  collections {
+    id
+    title
+  }
+}
+
+The result is shaped like this:
+
+{
+  "data": {
+    "collection": {
+      "id": "cjwuuj5bz000i0719rrtw5gqk",
+      "title": "Hats",
+      "items": [
+        {
+          "id": "cjwuuj5ip000j0719taw0mjdz",
+          "name": "Brown Brim",
+          "price": 25,
+          "imageUrl": "https://i.ibb.co/ZYW3VTp/brown-brim.png"
+        },
+        {
+          "id": "cjwuuj5j4000l0719l3ialwkj",
+          "name": "Blue Beanie",
+          "price": 18,
+          "imageUrl": "https://i.ibb.co/ypkgK0X/blue-beanie.png"
+        },
+        {
+          "id": "cjwuuj5je000n0719ch6nbhik",
+          "name": "Brown Cowboy",
+          "price": 35,
+          "imageUrl": "https://i.ibb.co/QdJwgmp/brown-cowboy.png"
+        },
+        {
+          "id": "cjwuuj5jh000p0719rtjatb2f",
+          "name": "Grey Brim",
+          "price": 25,
+          "imageUrl": "https://i.ibb.co/RjBLWxB/grey-brim.png"
+        },
+        {
+          "id": "cjwuuj5jp000r07198x90aciu",
+          "name": "Green Beanie",
+          "price": 18,
+          "imageUrl": "https://i.ibb.co/YTjW3vF/green-beanie.png"
+        },
+        {
+          "id": "cjwuuj5jy000t0719hgrbwczg",
+          "name": "Palm Tree Cap",
+          "price": 14,
+          "imageUrl": "https://i.ibb.co/rKBDvJX/palm-tree-cap.png"
+        },
+        {
+          "id": "cjwuuj5k0000v0719yug39d50",
+          "name": "Red Beanie",
+          "price": 18,
+          "imageUrl": "https://i.ibb.co/bLB646Z/red-beanie.png"
+        },
+        {
+          "id": "cjwuuj5k5000x071945jq904o",
+          "name": "Wolf Cap",
+          "price": 14,
+          "imageUrl": "https://i.ibb.co/1f2nWMM/wolf-cap.png"
+        },
+        {
+          "id": "cjwuuj5k7000z0719j89wlop9",
+          "name": "Blue Snapback",
+          "price": 16,
+          "imageUrl": "https://i.ibb.co/X2VJP2W/blue-snapback.png"
+        }
+      ]
+    },
+    "collections": [
+      {
+        "id": "cjwuuj5bz000i0719rrtw5gqk",
+        "title": "Hats"
+      },
+      {
+        "id": "cjwuun2fa001907195roo7iyk",
+        "title": "Jackets"
+      },
+      {
+        "id": "cjwuuprqs00240719lb9kvlqe",
+        "title": "Mens"
+      },
+      {
+        "id": "cjwuva2zz003f07193pv1xavh",
+        "title": "Sneakers"
+      },
+      {
+        "id": "cjwuvbix2003y071935qfqr7a",
+        "title": "Womens"
+      }
+    ]
+  }
+}
+
+7. What is the difference between uri and url paths?
+Url is the entire path with http or https - it contains the location. (Uniform resource locator)
+Uri can be the entire path but enough would be the domain name just after https. (Uniform resource identifier)
+
+8. What is the ApolloClient? 
+ApolloClient is something that requires the GraphQL server in the frontend application.
+
+9. Why apollo uses caching?
+For the same reason as any other tool, when you request for the exact same data that you requested before it looks into cache and takes the value from it.
+Thanks to that we have the local copy of the requested data.
+
+10. How can we name a query?
+
+query GetCollectionByID($id: ID!) {
+  collection(id: $id) {
+    id,
+    title, 
+    items {
+      id
+      name
+      price
+      imageUrl
+    }
+  }
+}
+
+11. How to define a query inside of React app?
+First wrap the whole application with ApolloProvider.
+Then define a query:
+
+const COLLECTIONS = gql`
+  query GetCollections {
+    collections {
+      id
+      title
+      items {
+        id
+        name
+        price
+        imageUrl
+      }
+    }
+  }
+`;
+
+const { loading, error, data } = useQuery(COLLECTIONS);
+
+12. How to spread through object and remain all properties but one?
+
+category.items.map((item) => {
+    const { __typename, ...otherProps } = item;
+    return otherProps;
+})
+
+13. How to reduce on array to convert an array into a map (one object)?
+const dataMap = collections.reduce((acc, category) => {
+return {
+    ...acc,
+    ...{
+    [category.title.toLowerCase()]: category.items.map((item) => {
+        const { __typename, ...otherProps } = item;
+        return otherProps;
+    }),
+    },
+};
+}, {});
+
+or 
+
+const dataMap = collections.reduce((acc, category) => {
+    const { title, items } = category;
+    acc[title.toLowerCase()] = items.map((item) => {
+        const { __typename, ...otherProps } = item;
+        return otherProps;
+    });
+    return acc;
+}, {});
+
+14. How to pass a variable into useQuery in React?
+
+const GET_CATEGORY = gql`
+  query GetCollectionsByTitle($title: String!) {
+    getCollectionsByTitle(title: $title) {
+      id
+      title
+      items {
+        id
+        name
+        price
+        imageUrl
+      }
+    }
+  }
+`;
+
+  const { data, loading } = useQuery(GET_CATEGORY, {
+    variables: {
+      title: category,
+    },
+  });
+
+15. How does caching works in apollo?
+It caches the query (if the parameters haven't changed and were called before) - it will not make another call,
+it will just take the value from the cache.
+Less request = better performance.
